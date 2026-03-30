@@ -152,7 +152,26 @@ local function getWord(prefix)
     prefix = prefix:lower():gsub("%s+", "")
     if #prefix == 0 then return nil end
 
-    local killerEnds = {f=true, x=true, z=true, q=true, v=true, w=true, c=true}
+    local killerEnds = {
+        ia=true, if=true, tif=true, ks=true, ksa=true,
+        ax=true, by=true, cy=true, dh=true, ch=true, dl=true,
+        ei=true, eo=true, eu=true, ex=true, ey=true, ez=true,
+        gh=true, gn=true, gr=true, gy=true,
+        ie=true, oi=true, lt=true, ly=true,
+        iki=true, ipe=true, iya=true, ipi=true,
+        oe=true, oo=true, ns=true, ox=true,
+        pt=true, mn=true, mp=true, nd=true,
+        sm=true, nj=true, ty=true, tl=true, th=true
+    }
+
+    local function isKillerWord(word)
+        for suffix, _ in pairs(killerEnds) do
+            if word:sub(-#suffix) == suffix then
+                return true
+            end
+        end
+        return false
+    end
 
     for len = #prefix, 1, -1 do
         local p = prefix:sub(1, len)
@@ -161,7 +180,7 @@ local function getWord(prefix)
             local killers, short, long = {}, {}, {}
             for _, word in ipairs(candidates) do
                 if not usedWords[word] and word:sub(1, len) == p then
-                    if killerEnds[word:sub(-1)] then
+                    if isKillerWord(word) then
                         table.insert(killers, word)
                     elseif #word <= 5 then
                         table.insert(short, word)
@@ -305,8 +324,27 @@ end
 local function getKillerSuggestions(prefix, count)
     prefix = prefix:lower():gsub("%s+", "")
     local results, seen = {}, {}
-    local killerEnds = {f=true, x=true, z=true, q=true, v=true, w=true, c=true}
+    local killerEnds = {
+        ia=true, if=true, tif=true, ks=true, ksa=true,
+        ax=true, by=true, cy=true, dh=true, ch=true, dl=true,
+        ei=true, eo=true, eu=true, ex=true, ey=true, ez=true,
+        gh=true, gn=true, gr=true, gy=true,
+        ie=true, oi=true, lt=true, ly=true,
+        iki=true, ipe=true, iya=true, ipi=true,
+        oe=true, oo=true, ns=true, ox=true,
+        pt=true, mn=true, mp=true, nd=true,
+        sm=true, nj=true, ty=true, tl=true, th=true
+    }
     
+    local function isKillerWord(word)
+        for suffix, _ in pairs(killerEnds) do
+            if word:sub(-#suffix) == suffix then
+                return true
+            end
+        end
+        return false
+    end
+
     if #prefix == 0 then return results end
 
     for len = #prefix, 1, -1 do
@@ -319,7 +357,7 @@ local function getKillerSuggestions(prefix, count)
             for _, word in ipairs(candidates) do
                 if word:sub(1, len) == p 
                 and not seen[word] 
-                and killerEnds[word:sub(-1)] then
+                and isKillerWord(word) then
                     seen[word] = true
                     table.insert(pool, word)
                 end
@@ -355,11 +393,10 @@ local function createUI()
     local leftRows  = 15
     local rightRows = 20
     local saranStartY = 90
-    local saranEndY   = saranStartY + (leftRows - 1) * ITEM_GAP + ITEM_H
-    local countY      = saranEndY + 6
+    local saranEndY   = saranStartY + (leftRows - 1) * ITEM_GAP + ITEM_H  -- ✅ Hitung dulu
+    local countY      = saranEndY + 6                                     -- ✅ Lalu ini
     local rightEndY   = 10 + rightRows * ITEM_GAP + ITEM_H
-    local contentH    = math.max(countY + ITEM_H + 10, rightEndY + 10)
-    local FIXED_HEIGHT = 300 -- 🔥 bebas kamu atur sendiri
+    local FIXED_HEIGHT = 300
     local frameH = FIXED_HEIGHT
 
     local ScreenGui = Instance.new("ScreenGui")
@@ -477,7 +514,7 @@ local function createUI()
     Content.BackgroundTransparency = 1
     Content.ScrollBarThickness = 4
     Content.ScrollBarImageColor3 = Color3.fromRGB(70, 180, 110)
-    Content.CanvasSize = UDim2.new(0, 0, 0, countY + 50)
+    Content.CanvasSize = UDim2.new(0, 0, 0, countY + 50)  -- ✅ Sekarang aman
     Content.ScrollingDirection = Enum.ScrollingDirection.Y
 
     local toggleCard = makeCard(Content, 0, LEFT_W, 8, 26)
