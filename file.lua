@@ -152,17 +152,7 @@ local function getWord(prefix)
     prefix = prefix:lower():gsub("%s+", "")
     if #prefix == 0 then return nil end
 
-    local killerEnds = {
-        ia=true, if=true, tif=true, ks=true, ksa=true,
-        ax=true, by=true, cy=true, dh=true, ch=true, dl=true,
-        ei=true, eo=true, eu=true, ex=true, ey=true, ez=true,
-        gh=true, gn=true, gr=true, gy=true,
-        ie=true, oi=true, lt=true, ly=true,
-        iki=true, ipe=true, iya=true, ipi=true,
-        oe=true, oo=true, ns=true, ox=true,
-        pt=true, mn=true, mp=true, nd=true,
-        sm=true, nj=true, ty=true, tl=true, th=true
-    }
+    local killerEnds = {f=true, x=true, z=true, q=true, v=true, w=true, c=true}
 
     for len = #prefix, 1, -1 do
         local p = prefix:sub(1, len)
@@ -171,17 +161,7 @@ local function getWord(prefix)
             local killers, short, long = {}, {}, {}
             for _, word in ipairs(candidates) do
                 if not usedWords[word] and word:sub(1, len) == p then
-                    local isKiller = false
-                    -- Deteksi akhiran 1 sampai 3 huruf
-                    for suffixLen = 1, 3 do
-                        local s = word:sub(-suffixLen)
-                        if killerEnds[s] then
-                            isKiller = true
-                            break
-                        end
-                    end
-
-                    if isKiller then
+                    if killerEnds[word:sub(-1)] then
                         table.insert(killers, word)
                     elseif #word <= 5 then
                         table.insert(short, word)
@@ -189,7 +169,7 @@ local function getWord(prefix)
                         table.insert(long, word)
                     end
                 end
-            end -- PENTING: Penutup loop 'for' harus di sini
+            end
 
             if #killers > 0 then
                 table.sort(killers, function(a, b) return #a > #b end)
@@ -246,20 +226,87 @@ local function getSuggestions(prefix, count)
 
     return suggestions
 end
+
+-- local KILLER_SUFFIXES = {"f", "x", "q", "z", "w", "v", "c"}
+
+-- local ISME_WORDS = {
+--     "kanibalisme","nasionalisme","kapitalisme","sosialisme","komunisme",
+--     "feminisme","heroisme","egoisme","nihilisme","optimisme",
+--     "pesimisme","romantisme","sadisme","masokisme","fanatisme",
+--     "plagiarisme","idealisme","realisme","empirisme","liberalisme",
+--     "konservatisme","absolutisme","anarkisme","paternalisme","seksisme",
+--     "rasisme","ateisme","terorisme","vandalisme","alkoholisme",
+--     "nepotisme","oportunisme","chauvinisme","urbanisme","regionalisme",
+--     "separatisme","ekstremisme","populisme","materialisme","sekularisme",
+--     "individualisme","kolektivisme","sentralisme","pluralisme","patriotisme",
+--     "modernisme","naturalisme","impresionisme","ekspresionisme","eksistensialisme",
+-- }
+
+-- local TIF_WORDS = {
+--     "representatif","administratif","informatif","komunikatif","produktif",
+--     "konstruktif","destruktif","instruktif","kolektif","objektif",
+--     "subjektif","perspektif","kompetitif","definitif","sensitif",
+--     "deklaratif","naratif","komparatif","operatif","konservatif",
+--     "normatif","formatif","transformatif","afirmatif","inovatif",
+--     "kreatif","alternatif","kooperatif","preventif","kumulatif",
+-- }
+
+-- local IF_WORDS = {
+--     "aktif","pasif","positif","negatif","agresif","defensif",
+--     "ofensif","masif","eksplosif","impulsif","kompulsif","obsesif",
+--     "depresif","eksklusif","inklusif","ekspansif","refleksif","progresif",
+--     "regresif","ekstensif","intensif","responsif","komprehensif","persuasif",
+-- }
+
+-- local function getKillerSuggestions(prefix, count)
+--     prefix = prefix:lower():gsub("%s+", "")
+--     local results, seen = {}, {}
+--     if #prefix == 0 then return results end
+
+--     for len = #prefix, 1, -1 do
+--         local p = prefix:sub(1, len)
+--         local candidates = byPrefix[p]
+--         if candidates then
+--             for _, suffix in ipairs(KILLER_SUFFIXES) do
+--                 for _, word in ipairs(candidates) do
+--                     if not usedWords[word] and not seen[word]
+--                         and word:sub(1, len) == p
+--                         and word:sub(-1) == suffix then
+--                         seen[word] = true
+--                         table.insert(results, word)
+--                         if #results >= 15 then break end
+--                     end
+--                 end
+--                 if #results >= 15 then break end
+--             end
+--         end
+--         if #results >= 15 then break end
+--     end
+
+--     local extras = {}
+--     for _, w in ipairs(ISME_WORDS) do table.insert(extras, w) end
+--     for _, w in ipairs(TIF_WORDS) do table.insert(extras, w) end
+--     for _, w in ipairs(IF_WORDS) do table.insert(extras, w) end
+
+--     for len = #prefix, 1, -1 do
+--         local p = prefix:sub(1, len)
+--         for _, word in ipairs(extras) do
+--             if not seen[word] and word:sub(1, len) == p then
+--                 seen[word] = true
+--                 table.insert(results, word)
+--                 if #results >= count then break end
+--             end
+--         end
+--         if #results >= count then break end
+--     end
+
+--     return results
+-- end
 local function getKillerSuggestions(prefix, count)
     prefix = prefix:lower():gsub("%s+", "")
     local results, seen = {}, {}
-    local killerEnds = {
-        ia=true, if=true, tif=true, ks=true, ksa=true,
-        ax=true, by=true, cy=true, dh=true, ch=true, dl=true,
-        ei=true, eo=true, eu=true, ex=true, ey=true, ez=true,
-        gh=true, gn=true, gr=true, gy=true,
-        ie=true, oi=true, lt=true, ly=true,
-        iki=true, ipe=true, iya=true, ipi=true,
-        oe=true, oo=true, ns=true, ox=true,
-        pt=true, mn=true, mp=true, nd=true,
-        sm=true, nj=true, ty=true, tl=true, th=true
-    }
+    local killerEnds = {f=true, x=true, z=true, q=true, v=true, w=true, c=true}
+    
     if #prefix == 0 then return results end
 
     for len = #prefix, 1, -1 do
@@ -270,19 +317,11 @@ local function getKillerSuggestions(prefix, count)
 
             -- ambil semua kandidat killer dulu
             for _, word in ipairs(candidates) do
-                if word:sub(1, len) == p and not seen[word] then
-                    local isKiller = false
-                    for suffixLen = 1, 3 do
-                        if killerEnds[word:sub(-suffixLen)] then
-                            isKiller = true
-                            break
-                        end
-                    end
-
-                    if isKiller then
-                        seen[word] = true
-                        table.insert(pool, word)
-                    end
+                if word:sub(1, len) == p 
+                and not seen[word] 
+                and killerEnds[word:sub(-1)] then
+                    seen[word] = true
+                    table.insert(pool, word)
                 end
             end
 
@@ -1000,21 +1039,14 @@ local function monitorMatchUI()
     end)
 end
 
-local UI = createUI() -- Jalankan UI dulu
-UI.StatusLbl.Text = "Status: Loading Wordlist..."
-
-spawn(function()
-    loadWordlist()
-    if totalWords > 0 then
-        setStatus("⚡ FAST MODE - Siap!", Color3.fromRGB(70, 220, 220))
-    else
-        setStatus("⚠ Gagal load data!", Color3.fromRGB(220, 100, 100))
-    end
-end)
-
--- Jalankan semua monitor setelah UI siap
 monitorMyBillboard()
 monitorRemotes()
 monitorUILabel()
 monitorManualSubmit()
 monitorMatchUI()
+
+if totalWords > 0 then
+    setStatus("⚡ FAST MODE - Siap! (" .. totalWords .. " kata)", Color3.fromRGB(70, 220, 220))
+else
+    setStatus("⚠ Gagal load wordlist! Cek koneksi internet", Color3.fromRGB(220, 100, 100))
+end
