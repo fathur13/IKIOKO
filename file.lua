@@ -1000,14 +1000,21 @@ local function monitorMatchUI()
     end)
 end
 
+local UI = createUI() -- Jalankan UI dulu
+UI.StatusLbl.Text = "Status: Loading Wordlist..."
+
+spawn(function()
+    loadWordlist()
+    if totalWords > 0 then
+        setStatus("⚡ FAST MODE - Siap!", Color3.fromRGB(70, 220, 220))
+    else
+        setStatus("⚠ Gagal load data!", Color3.fromRGB(220, 100, 100))
+    end
+end)
+
+-- Jalankan semua monitor setelah UI siap
 monitorMyBillboard()
 monitorRemotes()
 monitorUILabel()
 monitorManualSubmit()
 monitorMatchUI()
-
-if totalWords > 0 then
-    setStatus("⚡ FAST MODE - Siap! (" .. totalWords .. " kata)", Color3.fromRGB(70, 220, 220))
-else
-    setStatus("⚠ Gagal load wordlist! Cek koneksi internet", Color3.fromRGB(220, 100, 100))
-end
