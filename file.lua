@@ -302,33 +302,46 @@ end
 
 --     return results
 -- end
+local KILLER_SUFFIXES = {
+    "tif","if","ka", -- prioritas utama
+    "nd","ksa","pt","mp","nt",
+    "ax","ex","ox","oo",
+    "ty","th","ly","lt",
+    "gn","gr","gh",
+    "ei","eo","eu","ey","ez",
+    "ch","dh","dl","by","cy",
+    "iki","ipe","iya","ipi",
+    "oe","ns","mn","sm","nj","tl","ia"
+}
+
 local function getKillerSuggestions(prefix, count)
     prefix = prefix:lower():gsub("%s+", "")
     local results, seen = {}, {}
-    local killerEnds = {f=true, x=true, z=true, q=true, v=true, w=true, c=true}
-    
+
     if #prefix == 0 then return results end
 
     for len = #prefix, 1, -1 do
         local p = prefix:sub(1, len)
         local candidates = byPrefix[p]
+
         if candidates then
             local pool = {}
 
-            -- ambil semua kandidat killer dulu
             for _, word in ipairs(candidates) do
-                if word:sub(1, len) == p 
-                and not seen[word] 
-                and killerEnds[word:sub(-1)] then
-                    seen[word] = true
-                    table.insert(pool, word)
+                if word:sub(1, len) == p and not seen[word] then
+                    for _, suffix in ipairs(KILLER_SUFFIXES) do
+                        if word:sub(-#suffix) == suffix then
+                            seen[word] = true
+                            table.insert(pool, word)
+                            break
+                        end
+                    end
                 end
             end
 
-            -- 🔥 SHUFFLE BIAR ACAK TOTAL
+            -- acak hasil
             shuffle(pool)
 
-            -- 🔥 RANDOM SLICE (BIAR GAK NGAMBIL DEPAN TERUS)
             local startIndex = math.random(1, math.max(1, #pool - count))
             for i = startIndex, math.min(startIndex + count - 1, #pool) do
                 table.insert(results, pool[i])
