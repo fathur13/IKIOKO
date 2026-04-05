@@ -227,83 +227,8 @@ local function getSuggestions(prefix, count)
     return suggestions
 end
 
--- local KILLER_SUFFIXES = {"f", "x", "q", "z", "w", "v", "c"}
-
--- local ISME_WORDS = {
---     "kanibalisme","nasionalisme","kapitalisme","sosialisme","komunisme",
---     "feminisme","heroisme","egoisme","nihilisme","optimisme",
---     "pesimisme","romantisme","sadisme","masokisme","fanatisme",
---     "plagiarisme","idealisme","realisme","empirisme","liberalisme",
---     "konservatisme","absolutisme","anarkisme","paternalisme","seksisme",
---     "rasisme","ateisme","terorisme","vandalisme","alkoholisme",
---     "nepotisme","oportunisme","chauvinisme","urbanisme","regionalisme",
---     "separatisme","ekstremisme","populisme","materialisme","sekularisme",
---     "individualisme","kolektivisme","sentralisme","pluralisme","patriotisme",
---     "modernisme","naturalisme","impresionisme","ekspresionisme","eksistensialisme",
--- }
-
--- local TIF_WORDS = {
---     "representatif","administratif","informatif","komunikatif","produktif",
---     "konstruktif","destruktif","instruktif","kolektif","objektif",
---     "subjektif","perspektif","kompetitif","definitif","sensitif",
---     "deklaratif","naratif","komparatif","operatif","konservatif",
---     "normatif","formatif","transformatif","afirmatif","inovatif",
---     "kreatif","alternatif","kooperatif","preventif","kumulatif",
--- }
-
--- local IF_WORDS = {
---     "aktif","pasif","positif","negatif","agresif","defensif",
---     "ofensif","masif","eksplosif","impulsif","kompulsif","obsesif",
---     "depresif","eksklusif","inklusif","ekspansif","refleksif","progresif",
---     "regresif","ekstensif","intensif","responsif","komprehensif","persuasif",
--- }
-
--- local function getKillerSuggestions(prefix, count)
---     prefix = prefix:lower():gsub("%s+", "")
---     local results, seen = {}, {}
---     if #prefix == 0 then return results end
-
---     for len = #prefix, 1, -1 do
---         local p = prefix:sub(1, len)
---         local candidates = byPrefix[p]
---         if candidates then
---             for _, suffix in ipairs(KILLER_SUFFIXES) do
---                 for _, word in ipairs(candidates) do
---                     if not usedWords[word] and not seen[word]
---                         and word:sub(1, len) == p
---                         and word:sub(-1) == suffix then
---                         seen[word] = true
---                         table.insert(results, word)
---                         if #results >= 15 then break end
---                     end
---                 end
---                 if #results >= 15 then break end
---             end
---         end
---         if #results >= 15 then break end
---     end
-
---     local extras = {}
---     for _, w in ipairs(ISME_WORDS) do table.insert(extras, w) end
---     for _, w in ipairs(TIF_WORDS) do table.insert(extras, w) end
---     for _, w in ipairs(IF_WORDS) do table.insert(extras, w) end
-
---     for len = #prefix, 1, -1 do
---         local p = prefix:sub(1, len)
---         for _, word in ipairs(extras) do
---             if not seen[word] and word:sub(1, len) == p then
---                 seen[word] = true
---                 table.insert(results, word)
---                 if #results >= count then break end
---             end
---         end
---         if #results >= count then break end
---     end
-
---     return results
--- end
 local KILLER_SUFFIXES = {
-    "ks","tif","if","ksa","iki","owa", "uki", -- prioritas utama
+    "ks","tif","if","ksa","iki","owa", "uki","sih", -- prioritas utama
     "nd","pt","mp","nt",
     "ax","ex","ox","oo",
     "ty","th","ly","lt",
