@@ -303,7 +303,7 @@ end
 --     return results
 -- end
 local KILLER_SUFFIXES = {
-    "ks","tif","if","ksa","iki","owa", "uki" -- prioritas utama
+    "ks","tif","if","ksa","iki","owa", "uki", -- prioritas utama
     "nd","ks","pt","mp","nt",
     "ax","ex","ox","oo",
     "ty","th","ly","lt",
