@@ -43,7 +43,7 @@ end)
 local BUILTIN = {"aktif","pasif","positif","negatif","tif","ksa","nd","ks","pt","mp","nt","identifikasi","kompetitif","kreatif","motif","adaptif","naratif","formatif"}
 for _, w in ipairs(BUILTIN) do indexWord(w:lower()) end
 
-local KILLER_SUFFIXES = {"tif","if","ksa","iki","nd","ks","pt","mp","nt","ax","ex","ox","oo","ty","th","ly","lt","gn","gr","gh","ei","eo","eu","ch","dh","ipe","iya", "ia", "sih", "owa"}
+local KILLER_SUFFIXES = {"dot","tif","if","ksa","iki","nd","ks","pt","mp","nt","ax","ex","ox","oo","ty","th","ly","lt","gn","gr","gh","ei","eo","eu","ch","dh","ipe","iya", "ia", "sih", "owa"}
 
 -- ✅ SARAN - MENGIKUTI LENGKAP PREFIX
 local function getSuggestions(prefix, count)
