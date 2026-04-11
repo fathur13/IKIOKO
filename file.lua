@@ -13,6 +13,7 @@ local LocalPlayer = Players.LocalPlayer
 local Remotes = RS:WaitForChild("Remotes")
 
 local CONFIG = { MIN_LENGTH = 3 }
+local customSuffix = {}
 
 -- =============================================
 --   WORDLIST
@@ -51,61 +52,86 @@ local function getSuggestions(prefix, count)
     local suggestions = {}
     if #prefix == 0 then return suggestions end
 
-    -- ✅ UTAMA: Cari tepat prefix LENGKAP dulu
     local candidates = byPrefix[prefix]
-    local pool = {}
-    
+    local prioritized = {}
+    local fallback = {}
+
     if candidates then
         for _, word in ipairs(candidates) do
-            if word:sub(1, #prefix) == prefix then 
-                table.insert(pool, word)
+            if word:sub(1, #prefix) == prefix then
+
+                -- cek suffix match
+                local matchSuffix = (#customSuffix == 0)
+
+                for _, suf in ipairs(customSuffix) do
+                    if word:sub(-#suf) == suf then
+                        matchSuffix = true
+                        break
+                    end
+                end
+
+                if matchSuffix then
+                    table.insert(prioritized, word)
+                else
+                    table.insert(fallback, word)
+                end
             end
         end
     end
-    
-    -- ✅ RANDOMIZE
-    for i = 1, #pool do
-        local j = math.random(1, #pool)
+
+    -- kalau PRIORITAS kosong → fallback dipakai semua
+    local pool = {}
+
+    if #prioritized > 0 then
+        pool = prioritized
+    else
+        pool = fallback
+    end
+
+    -- shuffle random
+    for i = #pool, 2, -1 do
+        local j = math.random(i)
         pool[i], pool[j] = pool[j], pool[i]
     end
-    
-    for i = 1, math.min(#pool, count) do
-        table.insert(suggestions, pool[i])
+
+    local results = {}
+    for i = 1, math.min(count, #pool) do
+        results[i] = pool[i]
     end
-    return suggestions
+
+    return results
 end
 
 -- ✅ KILLER - MENGIKUTI LENGKAP PREFIX
 local function getKillerSuggestions(prefix, count)
     prefix = prefix:lower():gsub("%s+", "")
-    local results = {}
-    if #prefix == 0 then return results end
+    if #prefix == 0 then return {} end
 
-    local candidates = byPrefix[prefix]
     local pool = {}
-    
+    local candidates = byPrefix[prefix]
+
     if candidates then
         for _, word in ipairs(candidates) do
-            if word:sub(1, #prefix) == prefix then
-                for _, suffix in ipairs(KILLER_SUFFIXES) do
-                    if word:sub(-#suffix) == suffix then
-                        table.insert(pool, word)
-                        break
-                    end
+            for _, suf in ipairs(KILLER_SUFFIXES) do
+                if word:sub(-#suf) == suf then
+                    pool[#pool + 1] = word
+                    break
                 end
             end
         end
     end
-    
-    -- ✅ RANDOMIZE
-    for i = 1, #pool do
-        local j = math.random(1, #pool)
+
+    -- shuffle
+    for i = #pool, 2, -1 do
+        local j = math.random(i)
         pool[i], pool[j] = pool[j], pool[i]
     end
-    
-    for i = 1, math.min(#pool, count) do
-        table.insert(results, pool[i])
+
+    local results = {}
+    for i = 1, math.min(count, #pool) do
+        results[i] = pool[i]
     end
+
     return results
 end
 
@@ -214,10 +240,36 @@ local function createUI()
 
     local PrefixLbl = makeLabel(makeCard(Content, 0, LEFT_W, 40, 26), "Prefix: -", Color3.fromRGB(255, 195, 70), 14)
     PrefixLbl.Font = Enum.Font.GothamBold
+    -- INPUT SUFFIX MANUAL
+    local SuffixBox = Instance.new("TextBox", makeCard(Content, 0, LEFT_W, 70, 26))
+    SuffixBox.Size = UDim2.new(1, -10, 1, 0)
+    SuffixBox.Position = UDim2.new(0, 10, 0, 0)
+    SuffixBox.BackgroundTransparency = 1
+    SuffixBox.PlaceholderText = "Akhiran... (contoh: an, if, ks)"
+    SuffixBox.Text = ""
+    SuffixBox.TextColor3 = Color3.fromRGB(200, 200, 255)
+    SuffixBox.TextSize = 12
+    SuffixBox.Font = Enum.Font.Gotham
+    SuffixBox.TextXAlignment = Enum.TextXAlignment.Left
+
+    SuffixBox:GetPropertyChangedSignal("Text"):Connect(function()
+        local raw = SuffixBox.Text:lower()
+        customSuffix = {}
+
+        for s in raw:gmatch("[^,]+") do
+            local clean = s:gsub("%s+", "")
+            if clean ~= "" then
+                table.insert(customSuffix, clean)
+            end
+        end
+
+        -- 🔥 FORCE UPDATE
+        lastPrefix = ""
+    end)
 
     local SaranLabels = {}
     for i = 1, 12 do
-        local yPos = 70 + (i - 1) * ITEM_GAP
+        local yPos = 100 + (i - 1) * ITEM_GAP
         local lbl = makeLabel(makeCard(Content, 0, LEFT_W, yPos), "-", Color3.fromRGB(70, 200, 110), 18)
         lbl.Font = Enum.Font.GothamBold
         SaranLabels[i] = lbl
@@ -301,8 +353,10 @@ local function setStatus(text, color)
 end
 
 local function updateDisplay(prefix)
-    if prefix == lastPrefix and #prefix > 0 then return end
-    lastPrefix = prefix
+    local suffixKey = table.concat(customSuffix, ",")
+    local currentKey = prefix .. "|" .. suffixKey
+    if currentKey == lastPrefix then return end
+    lastPrefix = currentKey
     
     UI[2].Text = "Prefix: '" .. prefix:upper() .. "' (" .. #prefix .. " huruf)"
     UI[4].Text = "Total: " .. totalWords
