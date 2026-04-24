@@ -14,6 +14,7 @@ local Remotes = RS:WaitForChild("Remotes")
 
 local CONFIG = { MIN_LENGTH = 3 }
 local customSuffix = {}
+local manualPrefix = "" -- ✅ PINDAH KE SINI
 
 -- =============================================
 --   WORDLIST
@@ -240,8 +241,30 @@ local function createUI()
 
     local PrefixLbl = makeLabel(makeCard(Content, 0, LEFT_W, 40, 26), "Prefix: -", Color3.fromRGB(255, 195, 70), 14)
     PrefixLbl.Font = Enum.Font.GothamBold
+
+
+
+    -- INPUT AWALAN MANUAL
+    local PrefixBox = Instance.new("TextBox", makeCard(Content, 0, LEFT_W, 70, 26))
+    PrefixBox.Size = UDim2.new(1, -10, 1, 0)
+    PrefixBox.Position = UDim2.new(0, 10, 0, 0)
+    PrefixBox.BackgroundTransparency = 1
+    PrefixBox.PlaceholderText = "Awalan manual... (contoh: an, ke, pe)"
+    PrefixBox.Text = ""
+    PrefixBox.TextColor3 = Color3.fromRGB(200, 255, 200)
+    PrefixBox.TextSize = 12
+    PrefixBox.Font = Enum.Font.Gotham
+    PrefixBox.TextXAlignment = Enum.TextXAlignment.Left
+    PrefixBox:GetPropertyChangedSignal("Text"):Connect(function()
+        manualPrefix = PrefixBox.Text:lower():gsub("%s+", "")
+        lastPrefix = "" -- force refresh
+    end)
+
+
+
+
     -- INPUT SUFFIX MANUAL
-    local SuffixBox = Instance.new("TextBox", makeCard(Content, 0, LEFT_W, 70, 26))
+    local SuffixBox = Instance.new("TextBox", makeCard(Content, 0, LEFT_W, 100, 26))
     SuffixBox.Size = UDim2.new(1, -10, 1, 0)
     SuffixBox.Position = UDim2.new(0, 10, 0, 0)
     SuffixBox.BackgroundTransparency = 1
@@ -269,7 +292,7 @@ local function createUI()
 
     local SaranLabels = {}
     for i = 1, 12 do
-        local yPos = 100 + (i - 1) * ITEM_GAP
+        local yPos = 130 + (i - 1) * ITEM_GAP
         local lbl = makeLabel(makeCard(Content, 0, LEFT_W, yPos), "-", Color3.fromRGB(70, 200, 110), 18)
         lbl.Font = Enum.Font.GothamBold
         SaranLabels[i] = lbl
@@ -354,7 +377,7 @@ end
 
 local function updateDisplay(prefix)
     local suffixKey = table.concat(customSuffix, ",")
-    local currentKey = prefix .. "|" .. suffixKey
+    local currentKey = prefix .. "|" .. suffixKey .. "|" .. manualPrefix
     if currentKey == lastPrefix then return end
     lastPrefix = currentKey
     
@@ -422,7 +445,7 @@ spawn(function()
             end)
         end
         
-        local cleanPrefix = prefix:gsub("%s+", ""):lower()
+        local cleanPrefix = manualPrefix ~= "" and manualPrefix or prefix:gsub("%s+", ""):lower()
         if cleanPrefix:match("^%a+$") and #cleanPrefix >= 1 then
             updateDisplay(cleanPrefix)
         end
@@ -432,14 +455,16 @@ end)
 -- Remotes
 pcall(function()
     Remotes:FindFirstChild("BillboardStart").OnClientEvent:Connect(function(data)
-        local prefix = tostring(data):gsub("%s+", ""):lower()
-        if #prefix >= 1 then updateDisplay(prefix) end
+        local p = tostring(data):gsub("%s+", ""):lower()
+        local finalPrefix = manualPrefix ~= "" and manualPrefix or p
+        if #finalPrefix >= 1 then updateDisplay(finalPrefix) end
     end)
 end)
 pcall(function()
     Remotes:FindFirstChild("BillboardUpdate").OnClientEvent:Connect(function(data)
-        local prefix = tostring(data):gsub("%s+", ""):lower()
-        if #prefix >= 1 then updateDisplay(prefix) end
+        local p = tostring(data):gsub("%s+", ""):lower()
+        local finalPrefix = manualPrefix ~= "" and manualPrefix or p
+        if #finalPrefix >= 1 then updateDisplay(finalPrefix) end
     end)
 end)
 
